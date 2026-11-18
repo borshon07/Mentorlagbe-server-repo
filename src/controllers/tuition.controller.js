@@ -7,8 +7,15 @@ const users = () => getDB().collection("users");
 // PUBLIC: approved + active tuition, server-side search, filter, pagination
 export const getAllTuitions = async (req, res) => {
   try {
-    const { search, subject, classLevel, mode, page = 1, limit = 9 } = req.query;
-
+    const {
+      search,
+      subject,
+      classLevel,
+      mode,
+      location,
+      page = 1,
+      limit = 9,
+    } = req.query;
     const query = { approvalStatus: "approved", isActive: true };
 
     if (search) {
@@ -17,6 +24,7 @@ export const getAllTuitions = async (req, res) => {
         { subject: { $regex: search, $options: "i" } },
       ];
     }
+    if (location) query.location = { $regex: location, $options: "i" };
     if (subject) query.subject = subject;
     if (classLevel) query.classLevel = classLevel;
     if (mode) query.mode = mode;
@@ -82,16 +90,31 @@ export const createTuition = async (req, res) => {
 
     if (dbUser?.plan !== "pro" && count >= 2) {
       return res.status(403).json({
-        message: "Free plan allows only 2 tuition posts. Upgrade to Pro for unlimited posts.",
+        message:
+          "Free plan allows only 2 tuition posts. Upgrade to Pro for unlimited posts.",
       });
     }
 
     const {
-      title, subject, classLevel, mode, location,
-      monthlyFee, daysPerWeek, bannerImage, description,
+      title,
+      subject,
+      classLevel,
+      mode,
+      location,
+      monthlyFee,
+      daysPerWeek,
+      bannerImage,
+      description,
     } = req.body;
 
-    if (!title || !subject || !classLevel || !mode || !monthlyFee || !description) {
+    if (
+      !title ||
+      !subject ||
+      !classLevel ||
+      !mode ||
+      !monthlyFee ||
+      !description
+    ) {
       return res.status(400).json({ message: "Missing required fields" });
     }
 
@@ -141,8 +164,15 @@ export const updateTuition = async (req, res) => {
     }
 
     const allowed = [
-      "title", "subject", "classLevel", "mode", "location",
-      "monthlyFee", "daysPerWeek", "bannerImage", "description",
+      "title",
+      "subject",
+      "classLevel",
+      "mode",
+      "location",
+      "monthlyFee",
+      "daysPerWeek",
+      "bannerImage",
+      "description",
     ];
     const updates = {};
     for (const key of allowed) {
@@ -153,11 +183,13 @@ export const updateTuition = async (req, res) => {
 
     const result = await tuitions().updateOne(
       { _id: new ObjectId(id), tutorEmail: req.user.email },
-      { $set: updates }
+      { $set: updates },
     );
 
     if (result.matchedCount === 0) {
-      return res.status(404).json({ message: "Tuition not found or not yours" });
+      return res
+        .status(404)
+        .json({ message: "Tuition not found or not yours" });
     }
     res.json({ message: "Tuition updated" });
   } catch (error) {
@@ -178,12 +210,14 @@ export const toggleTuitionStatus = async (req, res) => {
       tutorEmail: req.user.email,
     });
     if (!tuition) {
-      return res.status(404).json({ message: "Tuition not found or not yours" });
+      return res
+        .status(404)
+        .json({ message: "Tuition not found or not yours" });
     }
 
     await tuitions().updateOne(
       { _id: tuition._id },
-      { $set: { isActive: !tuition.isActive } }
+      { $set: { isActive: !tuition.isActive } },
     );
     res.json({ message: "Status updated", isActive: !tuition.isActive });
   } catch (error) {
@@ -204,7 +238,9 @@ export const deleteTuition = async (req, res) => {
       tutorEmail: req.user.email,
     });
     if (result.deletedCount === 0) {
-      return res.status(404).json({ message: "Tuition not found or not yours" });
+      return res
+        .status(404)
+        .json({ message: "Tuition not found or not yours" });
     }
     res.json({ message: "Tuition deleted" });
   } catch (error) {
