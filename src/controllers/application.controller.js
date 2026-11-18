@@ -3,12 +3,13 @@ import { getDB } from "../config/db.js";
 
 const applications = () => getDB().collection("applications");
 const tuitions = () => getDB().collection("tuitions");
+const users = () => getDB().collection("users");
 
 // Unique index: ek student ek tuition e ekbar-i apply korte parbe
 export const ensureApplicationIndexes = async () => {
   await applications().createIndex(
     { tuitionId: 1, studentEmail: 1 },
-    { unique: true }
+    { unique: true },
   );
 };
 
@@ -16,7 +17,8 @@ export const ensureApplicationIndexes = async () => {
 export const applyForTuition = async (req, res) => {
   try {
     const { email, name } = req.user;
-    const { tuitionId, studentPhone, preferredSchedule, studentNote } = req.body;
+    const { tuitionId, studentPhone, preferredSchedule, studentNote } =
+      req.body;
 
     if (!tuitionId || !ObjectId.isValid(tuitionId)) {
       return res.status(400).json({ message: "Invalid tuition id" });
@@ -38,6 +40,8 @@ export const applyForTuition = async (req, res) => {
         .json({ message: "Tuition not found or not available" });
     }
 
+    const dbStudent = await users().findOne({ email });
+
     const doc = {
       tuitionId: tuition._id.toString(),
       tuitionTitle: tuition.title,
@@ -51,6 +55,7 @@ export const applyForTuition = async (req, res) => {
       preferredSchedule,
       studentNote: studentNote || "",
       status: "pending",
+      studentPlan: dbStudent?.plan === "pro" ? "pro" : "free",
       appliedAt: new Date(),
     };
 
@@ -66,7 +71,7 @@ export const applyForTuition = async (req, res) => {
   }
 };
 
-// STUDENT: check if already applied (details page e button disable korar jonno)
+// STUDENT: check if already applied
 export const checkApplied = async (req, res) => {
   try {
     const found = await applications().findOne({
@@ -117,12 +122,12 @@ export const cancelApplication = async (req, res) => {
   }
 };
 
-// TUTOR: applicants of my tuitions
+// TUTOR: applicants (Pro student age)
 export const getApplicants = async (req, res) => {
   try {
     const data = await applications()
       .find({ tutorEmail: req.user.email })
-      .sort({ appliedAt: -1 })
+      .sort({ studentPlan: -1, appliedAt: -1 })
       .toArray();
     res.json(data);
   } catch (error) {
@@ -145,7 +150,7 @@ export const updateApplicationStatus = async (req, res) => {
 
     const result = await applications().updateOne(
       { _id: new ObjectId(id), tutorEmail: req.user.email },
-      { $set: { status } }
+      { $set: { status } },
     );
 
     if (result.matchedCount === 0) {

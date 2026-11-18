@@ -4,6 +4,19 @@ import { getDB } from "../config/db.js";
 const tuitions = () => getDB().collection("tuitions");
 const users = () => getDB().collection("users");
 
+// Tuition list e tutor er plan jure dey (Verified badge er jonno)
+async function withTutorPlan(list) {
+  const emails = [...new Set(list.map((t) => t.tutorEmail))];
+  const tutors = await users()
+    .find({ email: { $in: emails } }, { projection: { email: 1, plan: 1 } })
+    .toArray();
+  const planMap = Object.fromEntries(tutors.map((u) => [u.email, u.plan]));
+  return list.map((t) => ({
+    ...t,
+    tutorPlan: planMap[t.tutorEmail] || "free",
+  }));
+}
+
 // PUBLIC: approved + active tuition, server-side search, filter, pagination
 export const getAllTuitions = async (req, res) => {
   try {
@@ -41,7 +54,7 @@ export const getAllTuitions = async (req, res) => {
       .toArray();
 
     res.json({
-      data,
+      data: await withTutorPlan(data),
       total,
       page: pageNum,
       totalPages: Math.ceil(total / limitNum),
@@ -59,7 +72,7 @@ export const getLatestTuitions = async (req, res) => {
       .sort({ createdAt: -1 })
       .limit(6)
       .toArray();
-    res.json(data);
+    res.json(await withTutorPlan(data));
   } catch (error) {
     res.status(500).json({ message: "Failed to fetch tuitions" });
   }
@@ -72,10 +85,16 @@ export const getTuitionById = async (req, res) => {
     if (!ObjectId.isValid(id)) {
       return res.status(400).json({ message: "Invalid tuition id" });
     }
+
     const tuition = await tuitions().findOne({ _id: new ObjectId(id) });
-    if (!tuition) return res.status(404).json({ message: "Tuition not found" });
-    res.json(tuition);
+    if (!tuition) {
+      return res.status(404).json({ message: "Tuition not found" });
+    }
+
+    const [withPlan] = await withTutorPlan([tuition]);
+    res.json(withPlan);
   } catch (error) {
+    console.error(error);
     res.status(500).json({ message: "Failed to fetch tuition" });
   }
 };
