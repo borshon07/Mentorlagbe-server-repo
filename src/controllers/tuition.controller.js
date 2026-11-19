@@ -8,15 +8,19 @@ const users = () => getDB().collection("users");
 async function withTutorPlan(list) {
   const emails = [...new Set(list.map((t) => t.tutorEmail))];
   const tutors = await users()
-    .find({ email: { $in: emails } }, { projection: { email: 1, plan: 1 } })
+    .find(
+      { email: { $in: emails } },
+      { projection: { email: 1, plan: 1, bio: 1, image: 1 } },
+    )
     .toArray();
-  const planMap = Object.fromEntries(tutors.map((u) => [u.email, u.plan]));
+  const map = Object.fromEntries(tutors.map((u) => [u.email, u]));
   return list.map((t) => ({
     ...t,
-    tutorPlan: planMap[t.tutorEmail] || "free",
+    tutorPlan: map[t.tutorEmail]?.plan || "free",
+    tutorBio: map[t.tutorEmail]?.bio || "",
+    tutorImage: map[t.tutorEmail]?.image || "",
   }));
 }
-
 // PUBLIC: approved + active tuition, server-side search, filter, pagination
 export const getAllTuitions = async (req, res) => {
   try {

@@ -9,6 +9,7 @@ export const getSavedIds = async (req, res) => {
     const user = await users().findOne({ email: req.user.email });
     res.json(user?.savedTuitions || []);
   } catch (error) {
+    console.error(error);
     res.status(500).json({ message: "Failed to fetch saved tuitions" });
   }
 };
