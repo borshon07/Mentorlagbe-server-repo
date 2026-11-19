@@ -1,4 +1,7 @@
 import { ObjectId } from "mongodb";
+import { getDB } from "../config/db.js";
+
+const users = () => getDB().collection("users");
 
 // STUDENT: saved tuition id list
 export const getSavedIds = async (req, res) => {
