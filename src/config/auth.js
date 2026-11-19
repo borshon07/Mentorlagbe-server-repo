@@ -44,12 +44,19 @@ export const auth = betterAuth({
       },
     },
   },
-  databaseHooks: {
+   databaseHooks: {
     user: {
       create: {
         before: async (user) => {
           const role = user.role === "tutor" ? "tutor" : "student";
           return { data: { ...user, role, plan: "free" } };
+        },
+      },
+      update: {
+        before: async (data) => {
+          // role ar plan BetterAuth er update diye bodlano jabe na
+          const { role, plan, ...safe } = data;
+          return { data: safe };
         },
       },
     },
