@@ -10,10 +10,12 @@ export const auth = betterAuth({
   database: mongodbAdapter(db, { client: getClient() }),
   trustedOrigins: [process.env.CLIENT_URL].filter(Boolean),
   advanced: {
-    defaultCookieAttributes:
-      process.env.NODE_ENV === "production"
-        ? { sameSite: "none", secure: true }
-        : {},
+    useSecureCookies: process.env.NODE_ENV === "production",
+    defaultCookieAttributes: {
+      httpOnly: true,
+      sameSite: "lax",
+      secure: process.env.NODE_ENV === "production",
+    },
   },
   emailAndPassword: {
     enabled: true,
@@ -30,21 +32,13 @@ export const auth = betterAuth({
   user: {
     modelName: "users",
     additionalFields: {
-      role: {
-        type: "string",
-        defaultValue: "student",
-        input: true,
-      },
+      role: { type: "string", defaultValue: "student", input: true },
       phone: { type: "string", required: false },
       bio: { type: "string", required: false },
-      plan: {
-        type: "string",
-        defaultValue: "free",
-        input: false,
-      },
+      plan: { type: "string", defaultValue: "free", input: false },
     },
   },
-   databaseHooks: {
+  databaseHooks: {
     user: {
       create: {
         before: async (user) => {
@@ -54,7 +48,6 @@ export const auth = betterAuth({
       },
       update: {
         before: async (data) => {
-          // role ar plan BetterAuth er update diye bodlano jabe na
           const { role, plan, ...safe } = data;
           return { data: safe };
         },

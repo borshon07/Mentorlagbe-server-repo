@@ -18,11 +18,10 @@ router.get("/token", async (req, res) => {
 
     const { id, email, role, name } = session.user;
 
-    const token = jwt.sign(
-      { id, email, role, name },
-      process.env.JWT_SECRET,
-      { expiresIn: "1d" }
-    );
+    const token = jwt.sign({ id, email, role, name }, process.env.JWT_SECRET, {
+      expiresIn: "1h",
+      algorithm: "HS256",
+    });
 
     res.json({ token });
   } catch (error) {
