@@ -21,7 +21,7 @@ export const auth = betterAuth({
 
   emailAndPassword: {
     enabled: true,
-    minPasswordLength: 6,
+    minPasswordLength: 12,
   },
 
   socialProviders: process.env.GOOGLE_CLIENT_ID
