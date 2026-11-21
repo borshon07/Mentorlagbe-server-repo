@@ -122,6 +122,76 @@ export const cancelApplication = async (req, res) => {
   }
 };
 
+// STUDENT: accepted application e rating + review
+export const submitReview = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const rating = Number(req.body.rating);
+    const review = (req.body.review || "").trim();
+
+    if (!ObjectId.isValid(id)) {
+      return res.status(400).json({ message: "Invalid application id" });
+    }
+    if (!Number.isInteger(rating) || rating < 1 || rating > 5) {
+      return res.status(400).json({ message: "Rating must be 1 to 5" });
+    }
+    if (review.length > 500) {
+      return res.status(400).json({ message: "Review is too long" });
+    }
+
+    const result = await applications().updateOne(
+      {
+        _id: new ObjectId(id),
+        studentEmail: req.user.email,
+        status: "accepted",
+      },
+      { $set: { rating, review, reviewedAt: new Date() } },
+    );
+
+    if (result.matchedCount === 0) {
+      return res.status(403).json({
+        message: "Only accepted applications can be reviewed",
+      });
+    }
+    res.json({ message: "Review submitted" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Failed to submit review" });
+  }
+};
+
+// PUBLIC: reviews + average for a tuition
+export const getTuitionReviews = async (req, res) => {
+  try {
+    const data = await applications()
+      .find(
+        { tuitionId: req.params.tuitionId, rating: { $exists: true } },
+        {
+          projection: {
+            studentName: 1,
+            rating: 1,
+            review: 1,
+            reviewedAt: 1,
+          },
+        },
+      )
+      .sort({ reviewedAt: -1 })
+      .toArray();
+
+    const average = data.length
+      ? data.reduce((sum, r) => sum + r.rating, 0) / data.length
+      : 0;
+
+    res.json({
+      reviews: data,
+      average: Math.round(average * 10) / 10,
+      count: data.length,
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Failed to fetch reviews" });
+  }
+};
+
 // TUTOR: applicants (Pro student age)
 export const getApplicants = async (req, res) => {
   try {

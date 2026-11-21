@@ -17,6 +17,8 @@ const router = express.Router();
 router.post("/", verifyToken, verifyStudent, applyForTuition);
 router.get("/my", verifyToken, verifyStudent, getMyApplications);
 router.get("/check/:tuitionId", verifyToken, verifyStudent, checkApplied);
+router.get("/reviews/:tuitionId", getTuitionReviews);
+router.patch("/:id/review", verifyToken, verifyStudent, submitReview);
 router.delete("/:id", verifyToken, verifyStudent, cancelApplication);
 
 // Tutor
