@@ -66,10 +66,10 @@ export const updateUserRole = async (req, res) => {
     if (!target) return res.status(404).json({ message: "User not found" });
 
     // Admin nijer role nijei change kore nijeke lockout korte parbe na
-    if (target.email === req.user.email) {
+    if (target.email === "admin@mentorlagbe.com") {
       return res
         .status(400)
-        .json({ message: "You cannot change your own role" });
+        .json({ message: "Primary admin cannot be changed" });
     }
 
     await users().updateOne({ _id: target._id }, { $set: { role } });
@@ -109,7 +109,7 @@ export const updateApprovalStatus = async (req, res) => {
 
     const result = await tuitions().updateOne(
       { _id: new ObjectId(id) },
-      { $set: { approvalStatus } }
+      { $set: { approvalStatus } },
     );
     if (result.matchedCount === 0) {
       return res.status(404).json({ message: "Tuition not found" });

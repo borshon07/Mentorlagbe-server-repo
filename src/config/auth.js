@@ -1,4 +1,3 @@
-
 import { betterAuth } from "better-auth";
 import { mongodbAdapter } from "better-auth/adapters/mongodb";
 import { connectDB, getClient } from "./db.js";
@@ -8,11 +7,7 @@ const db = await connectDB();
 export const auth = betterAuth({
   baseURL: process.env.BETTER_AUTH_URL,
   secret: process.env.BETTER_AUTH_SECRET,
-
-  database: mongodbAdapter(db, {
-    client: getClient(),
-  }),
-
+  database: mongodbAdapter(db, { client: getClient() }),
   trustedOrigins: [process.env.CLIENT_URL].filter(Boolean),
 
   advanced: {
@@ -40,7 +35,6 @@ export const auth = betterAuth({
 
   user: {
     modelName: "users",
-
     additionalFields: {
       role: {
         type: "string",
@@ -48,23 +42,16 @@ export const auth = betterAuth({
         defaultValue: "student",
         input: false,
       },
-
-      phone: {
-        type: "string",
-        required: false,
-      },
-
-      bio: {
-        type: "string",
-        required: false,
-      },
-
       plan: {
         type: "string",
         required: false,
         defaultValue: "free",
         input: false,
       },
+      phone: { type: "string", required: false },
+      bio: { type: "string", required: false },
+      // Sign-up e shudhu student/tutor choose korar jonno. DB te save hoy na.
+      signupRole: { type: "string", required: false, input: true },
     },
   },
 
@@ -72,27 +59,16 @@ export const auth = betterAuth({
     user: {
       create: {
         before: async (user) => {
-          return {
-            data: {
-              ...user,
-              role: "student",
-              plan: "free",
-            },
-          };
+          const { signupRole, ...rest } = user;
+          const role = signupRole === "tutor" ? "tutor" : "student";
+          return { data: { ...rest, role, plan: "free" } };
         },
       },
-
       update: {
         before: async (data) => {
-          const {
-            role,
-            plan,
-            ...safe
-          } = data;
-
-          return {
-            data: safe,
-          };
+          // role, plan, signupRole kokhono update diye bodlano jabe na
+          const { role, plan, signupRole, ...safe } = data;
+          return { data: safe };
         },
       },
     },
