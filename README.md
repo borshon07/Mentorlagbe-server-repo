@@ -2,9 +2,9 @@
 
 Express and MongoDB API for the MentorLagbe tuition platform.
 
-- **Live API:** <server-live-url>
+- **Live API:** https://mentorlagbe-server-nine.vercel.app
+- **Live Site:** https://mentorlagbe-client-rosy.vercel.app
 - **Client Repository:** <client-repo-url>
-- **Live Site:** <client-live-url>
 
 ## Test Accounts
 
@@ -12,26 +12,25 @@ Express and MongoDB API for the MentorLagbe tuition platform.
 |---|---|---|
 | Admin | admin@mentorlagbe.com | Admin@12345 |
 | Tutor (Pro) | tanvir@mentorlagbe.com | Tutor@12345 |
-| Student | nusrat@mentorlagbe.com | Student@12345 |
+| Student | <student-email> | <student-password> |
 
 ## Key Features
 
 - BetterAuth with MongoDB adapter and Google login
-- JWT issued from the authenticated session, verified by custom middlewares: `verifyToken`, `verifyStudent`, `verifyTutor`, `verifyAdmin`
+- JWT from the authenticated session, verified by custom middlewares: `verifyToken`, `verifyStudent`, `verifyTutor`, `verifyAdmin`
 - Role and plan cannot be changed through the public auth update endpoint
 - Tuition CRUD with server-side search, filter and pagination
-- Application API with unique index to block duplicate applications
+- Applications with a unique index to block duplicates, plus reviews and ratings
 - Admin API: stats, users, role change, tuition approval, payments
-- Stripe Checkout, session verification and webhook support
+- Stripe Checkout, session verification and webhook
 - Free plan limit (2 tuitions) enforced on the server
-- Bookmark API for saved tuitions
-- Seed scripts for demo data
+- Bookmark API, seed scripts for demo data
 
 ## Database
 
 The app uses 4 collections: `users`, `tuitions`, `applications`, `payments`. BetterAuth also creates its internal `session`, `account` and `verification` collections.
 
-## npm Packages
+## Packages
 
 express, cors, dotenv, mongodb, better-auth, jsonwebtoken, stripe, nodemon (dev)
 
@@ -44,4 +43,4 @@ See `.env.example`: PORT, CLIENT_URL, MONGODB_URI, DB_NAME, JWT_SECRET, BETTER_A
     npm run dev          # start with nodemon
     npm start            # start
     npm run seed:admin   # create the admin user
-    npm run seed         # seed tutors, students, tuitions, applications, payments
+    npm run seed         # seed demo tutors, students, tuitions, applications, payments
