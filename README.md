@@ -4,7 +4,7 @@ Express and MongoDB API for the MentorLagbe tuition platform.
 
 - **Live API:** https://mentorlagbe-server-nine.vercel.app
 - **Live Site:** https://mentorlagbe-client-rosy.vercel.app
-- **Client Repository:** https://github.com/borshon07/Mentorlagbe-server-repo
+- **Client Repository:** https://github.com/borshon07/Mentorlagbe-client-repo
 
 ## Test Accounts
 
