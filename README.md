@@ -4,15 +4,15 @@ Express and MongoDB API for the MentorLagbe tuition platform.
 
 - **Live API:** https://mentorlagbe-server-nine.vercel.app
 - **Live Site:** https://mentorlagbe-client-rosy.vercel.app
-- **Client Repository:** <client-repo-url>
+- **Client Repository:** https://github.com/borshon07/Mentorlagbe-server-repo
 
 ## Test Accounts
 
-| Role | Email | Password |
-|---|---|---|
-| Admin | admin@mentorlagbe.com | Admin@12345 |
-| Tutor (Pro) | tanvir@mentorlagbe.com | Tutor@12345 |
-| Student | <student-email> | <student-password> |
+| Role        | Email                  | Password     |
+| ----------- | ---------------------- | ------------ |
+| Admin       | admin@mentorlagbe.com  | Admin@12345  |
+| Tutor (Pro) | tanvir@mentorlagbe.com | Tutor@12345  |
+| Student     | student12@gmail.com    | student12@12 |
 
 ## Key Features
 
