@@ -21,7 +21,7 @@ export const auth = betterAuth({
 
   emailAndPassword: {
     enabled: true,
-    minPasswordLength: 12,
+    minPasswordLength: 8,
   },
 
   socialProviders: process.env.GOOGLE_CLIENT_ID
@@ -60,8 +60,18 @@ export const auth = betterAuth({
       create: {
         before: async (user) => {
           const { signupRole, ...rest } = user;
+
+          const nameRegex = /^[A-Za-z]+(?:[ .'-][A-Za-z]+)*$/;
+
+          if (!nameRegex.test(user.name)) {
+            throw new Error("Please enter a valid English name.");
+          }
+
           const role = signupRole === "tutor" ? "tutor" : "student";
-          return { data: { ...rest, role, plan: "free" } };
+
+          return {
+            data: { ...rest, role, plan: "free" },
+          };
         },
       },
       update: {
