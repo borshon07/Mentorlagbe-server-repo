@@ -6,9 +6,15 @@ import { ensureApplicationIndexes } from "../src/controllers/application.control
 let ready;
 
 export default async function handler(req, res) {
-  if (!ready) {
-    ready = connectDB().then(() => ensureApplicationIndexes());
+  try {
+    if (!ready) {
+      ready = connectDB().then(() => ensureApplicationIndexes());
+    }
+    await ready;
+    return app(req, res);
+  } catch (error) {
+    ready = undefined;
+    console.error("Startup error:", error);
+    res.status(500).json({ message: "Server startup failed" });
   }
-  await ready;
-  return app(req, res);
 }
